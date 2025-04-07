@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzguLoHs-7yrbSal8IBDqnKL8MWwlUJZA",
+            authDomain: "tmcp-a366e.firebaseapp.com",
+            databaseURL: "https://tmcp-a366e-default-rtdb.firebaseio.com",
+            projectId: "tmcp-a366e",
+            storageBucket: "tmcp-a366e.firebasestorage.app",
+            messagingSenderId: "136159734708",
+            appId: "1:136159734708:web:5f33b5cd7535c09227e0e1"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        window.db = db; // Make db accessible globally
+    </script>
+</head>
+<body>
+    <!-- Dashboard Container -->
+    <div class="dashboard">
+        <header class="mobile-header">
+            <h1>Student Profile</h1>
+            <button class="hamburger" aria-label="Toggle menu">☰</button>
+        </header>
+        <aside class="sidebar">
+            <h2>Student Portal</h2>
+            <button class="close-sidebar">×</button>
+            <nav>
+                <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
+                <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
+                <button title="Upload assignments">📤 Upload Assignment</button>
+                <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
+            </nav>
+            <button class="settings-btn" title="Open settings">⚙️ Settings</button>
+            <button class="logout-btn" title="Logout">🚪 Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Student Profile</h1>
+                <a href="index.html" class="back-btn">Back to Dashboard</a>
+            </header>
+
+            <section class="profile-section">
+                <h2>Profile Details</h2>
+                <div class="form-grid" id="profileDetails">
+                    <div class="profile-item">
+                        <strong>Name:</strong>
+                        <span id="profileName">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Roll No:</strong>
+                        <span id="profileRollNo">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Father's Name:</strong>
+                        <span id="profileFatherName">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Branch:</strong>
+                        <span id="profileBranch">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Semester:</strong>
+                        <span id="profileSemester">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Mobile No:</strong>
+                        <span id="profileMobile">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Email:</strong>
+                        <span id="profileEmail">Loading...</span>
+                    </div>
+                </div>
+                <button class="edit-btn" id="editProfileBtn">Edit Profile</button>
+            </section>
+
+            <!-- Edit Profile Modal -->
+            <div id="editProfileModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-btn" id="closeModalBtn">×</span>
+                    <h2>Edit Profile</h2>
+                    <form class="form-grid" id="editProfileForm">
+                        <div class="form-item">
+                            <label for="editName">Name:</label>
+                            <input type="text" id="editName" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="editRollNo">Roll No:</label>
+                            <input type="text" id="editRollNo" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="editFatherName">Father's Name:</label>
+                            <input type="text" id="editFatherName" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="editBranch">Branch:</label>
+                            <select id="editBranch" required>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Mechanical">Mechanical</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label for="editSemester">Semester:</label>
+                            <select id="editSemester" required>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label for="editMobile">Mobile No:</label>
+                            <input type="tel" id="editMobile" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="editEmail">Email:</label>
+                            <input type="email" id="editEmail" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="form-btn save-btn">Update</button>
+                            <button type="button" class="form-btn cancel-btn" id="cancelEditBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>

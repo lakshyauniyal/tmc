@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile Form</title>
+    <style>
+        .form-container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Student Profile Form</h2>
+        <form id="studentForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="rollNo">Roll No:</label>
+                <input type="text" id="rollNo" required>
+            </div>
+            <div class="form-group">
+                <label for="fatherName">Father's Name:</label>
+                <input type="text" id="fatherName" required>
+            </div>
+            <div class="form-group">
+                <label for="branch">Branch:</label>
+                <select id="branch" required>
+                    <option value="COE">COE</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="semester">Semester:</label>
+                <select id="semester" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile No:</label>
+                <input type="tel" id="mobile" required pattern="[0-9]{10}">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK with type="module" -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, set, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzguLoHs-7yrbSal8IBDqnKL8MWwlUJZA",
+            authDomain: "tmcp-a366e.firebaseapp.com",
+            databaseURL: "https://tmcp-a366e-default-rtdb.firebaseio.com",
+            projectId: "tmcp-a366e",
+            storageBucket: "tmcp-a366e.firebasestorage.app",
+            messagingSenderId: "136159734708",
+            appId: "1:136159734708:web:5f33b5cd7535c09227e0e1"
+        };
+
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const database = getDatabase(app);
+            console.log("Firebase initialized successfully");
+
+            // Form submission handler
+            document.getElementById('studentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const studentData = {
+                    name: document.getElementById('name').value.trim(),
+                    rollNo: document.getElementById('rollNo').value.trim(),
+                    fatherName: document.getElementById('fatherName').value.trim(),
+                    branch: document.getElementById('branch').value,
+                    semester: document.getElementById('semester').value,
+                    mobile: document.getElementById('mobile').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    createdAt: serverTimestamp()
+                };
+
+                console.log("Submitting data:", studentData);
+
+                // Clean rollNo for Firebase key
+                const cleanRollNo = studentData.rollNo.replace(/[.#$/[\]]/g, '_');
+
+                // Save to Firebase
+                set(ref(database, 'students/' + cleanRollNo), studentData)
+                    .then(() => {
+                        console.log("Write operation successful");
+                        alert('Student profile saved successfully!');
+                        document.getElementById('studentForm').reset();
+                    })
+                    .catch((error) => {
+                        console.error("Write failed:", error);
+                        alert('Error saving data: ' + error.message);
+                    });
+            });
+
+            // Check connection status
+            const connectedRef = ref(database, '.info/connected');
+            connectedRef.on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    console.log('Connected to Firebase');
+                } else {
+                    console.log('Disconnected from Firebase');
+                }
+            });
+
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+    </script>
+</body>
+</html>

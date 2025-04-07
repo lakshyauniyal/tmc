@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="mobile-header">
+            <h1>Student Dashboard</h1>
+            <button class="hamburger" aria-label="Toggle menu">☰</button>
+        </header>
+        <aside class="sidebar">
+            <h2>Student Portal</h2>
+            <button class="close-sidebar">×</button>
+            <nav>
+                <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
+                <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
+                <button title="Upload assignments">📤 Upload Assignment</button>
+                <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
+            </nav>
+            <button class="settings-btn" title="Open settings">⚙️ Settings</button>
+            <button class="logout-btn" title="Logout">🚪 Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Student Dashboard</h1>
+            </header>
+
+            <section id="studentDetailsSection" class="data-section">
+                <h2>Student Details</h2>
+                <div class="form-grid" id="studentDetails">
+                    <div><strong>Name:</strong> <span id="profileName">Loading...</span></div>
+                    <div><strong>Email:</strong> <span id="profileEmail">Loading...</span></div>
+                    <div><strong>Roll No:</strong> <span id="profileRollNo">Loading...</span></div>
+                    <div><strong>Course:</strong> <span id="profileBranch">Loading...</span></div>
+                    <div><strong>Semester:</strong> <span id="profileSemester">Loading...</span></div>
+                </div>
+            </section>
+
+            <!-- Rest of your sections remain unchanged -->
+            <section id="sessionalMarksSection" class="data-section">
+                <h2>Sessional Marks</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sessional 1</th>
+                            <th>Sessional 2</th>
+                            <th>Sessional 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>85 <a href="marks.html#sessional1" class="details-btn">Details</a></td>
+                            <td>90 <a href="marks.html#sessional2" class="details-btn">Details</a></td>
+                            <td>88 <a href="marks.html#sessional3" class="details-btn">Details</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="assignmentUploadSection" class="form-section">
+                <h2>Upload Assignment</h2>
+                <form class="form-grid" id="assignmentUploadForm">
+                    <select id="assignmentSubject" required>
+                        <option value="">Select Subject</option>
+                    </select>
+                    <select id="assignmentNumber" required>
+                        <option value="">Select Assignment Number</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <input type="file" id="assignmentFile" accept=".pdf" required>
+                    <button type="submit" class="form-btn">Upload</button>
+                </form>
+                <div id="uploadStatus" style="margin-top: 10px; color: var(--accent-color);"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzguLoHs-7yrbSal8IBDqnKL8MWwlUJZA",
+            authDomain: "tmcp-a366e.firebaseapp.com",
+            databaseURL: "https://tmcp-a366e-default-rtdb.firebaseio.com",
+            projectId: "tmcp-a366e",
+            storageBucket: "tmcp-a366e.firebasestorage.app",
+            messagingSenderId: "136159734708",
+            appId: "1:136159734708:web:5f33b5cd7535c09227e0e1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Function to fetch and display student data
+        function fetchStudentData(rollNo) {
+            const studentRef = ref(database, 'students/' + rollNo);
+            onValue(studentRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById('profileName').textContent = data.name || 'N/A';
+                    document.getElementById('profileEmail').textContent = data.email || 'N/A';
+                    document.getElementById('profileRollNo').textContent = data.rollNo || 'N/A';
+                    document.getElementById('profileBranch').textContent = data.branch || 'N/A';
+                    document.getElementById('profileSemester').textContent = data.semester || 'N/A';
+                } else {
+                    document.getElementById('profileName').textContent = 'Not found';
+                    document.getElementById('profileEmail').textContent = 'Not found';
+                    document.getElementById('profileRollNo').textContent = 'Not found';
+                    document.getElementById('profileBranch').textContent = 'Not found';
+                    document.getElementById('profileSemester').textContent = 'Not found';
+                }
+            }, (error) => {
+                console.error("Error fetching data:", error);
+                alert('Error fetching data: ' + error.message);
+            });
+        }
+
+        // Example: Fetch data for a specific roll number
+        // In a real scenario, you'd get this from user input or authentication
+        const sampleRollNo = prompt("Please enter your Roll No to view your details:");
+        if (sampleRollNo) {
+            fetchStudentData(sampleRollNo.replace(/[.#$/[\]]/g, '_'));
+        }
+    </script>
+</body>
+</html>

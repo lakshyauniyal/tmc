@@ -1,0 +1,230 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Signup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --accent-color: #3498db;
+            --btn-bg: #3498db;
+            --btn-hover: #2980b9;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --error-color: #e74c3c;
+            --success-color: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .signup-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--btn-bg);
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .signup-btn:hover {
+            background: var(--btn-hover);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .error-message {
+            color: var(--error-color);
+        }
+
+        .success-message {
+            color: var(--success-color);
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h1>Student Signup</h1>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="rollNo">Roll Number</label>
+                <input type="text" id="rollNo" required placeholder="Enter your roll number">
+            </div>
+            <div class="form-group" id="passwordGroup" style="display: none;">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Create a password" minlength="6">
+            </div>
+            <button type="submit" class="signup-btn">Sign Up</button>
+            <p class="message error-message" id="errorMessage">Invalid Roll Number</p>
+            <p class="message success-message" id="successMessage">Signup successful! Please login.</p>
+        </form>
+        <p style="text-align: center; margin-top: 1rem;">
+            Already have an account? <a href="login.html">Login</a>
+        </p>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { get, ref, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+        const signupForm = document.getElementById('signupForm');
+        const rollNoInput = document.getElementById('rollNo');
+        const passwordGroup = document.getElementById('passwordGroup');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        rollNoInput.addEventListener('blur', async () => {
+            const rollNo = rollNoInput.value.trim().toUpperCase();
+            if (rollNo) {
+                try {
+                    const studentRef = ref(db, `students/${rollNo}`);
+                    const snapshot = await get(studentRef);
+                    
+                    if (snapshot.exists()) {
+                        passwordGroup.style.display = 'block';
+                        passwordInput.required = true;
+                    } else {
+                        passwordGroup.style.display = 'none';
+                        passwordInput.required = false;
+                        errorMessage.style.display = 'block';
+                        errorMessage.textContent = 'Invalid Roll Number';
+                        setTimeout(() => errorMessage.style.display = 'none', 3000);
+                    }
+                } catch (error) {
+                    console.error('Error checking roll number:', error);
+                }
+            }
+        });
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const rollNo = rollNoInput.value.trim().toUpperCase();
+            const password = passwordInput.value;
+
+            try {
+                // Check if student exists
+                const studentRef = ref(db, `students/${rollNo}`);
+                const studentSnapshot = await get(studentRef);
+
+                if (!studentSnapshot.exists()) {
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Invalid Roll Number';
+                    setTimeout(() => errorMessage.style.display = 'none', 3000);
+                    return;
+                }
+
+                const studentData = studentSnapshot.val();
+                const email = studentData.email;
+
+                // Check if already signed up
+                const credentialRef = ref(db, `studentCredentials/${rollNo}`);
+                const credentialSnapshot = await get(credentialRef);
+
+                if (credentialSnapshot.exists()) {
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'This roll number is already registered';
+                    setTimeout(() => errorMessage.style.display = 'none', 3000);
+                    return;
+                }
+
+                // Create user in Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log('User created:', userCredential.user);
+
+                // Store credential reference
+                await set(ref(db, `studentCredentials/${rollNo}`), {
+                    email: email,
+                    uid: userCredential.user.uid,
+                    createdAt: Date.now()
+                });
+
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = error.code === 'auth/email-already-in-use'
+                    ? 'This roll number is already registered'
+                    : error.code === 'auth/weak-password'
+                    ? 'Password must be at least 6 characters'
+                    : 'Signup error: ' + error.message;
+                setTimeout(() => errorMessage.style.display = 'none', 3000);
+            }
+        });
+    </script>
+</body>
+</html>

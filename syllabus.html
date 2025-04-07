@@ -6,26 +6,8 @@
     <title>Syllabus</title>
     <link rel="stylesheet" href="syllabus.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-        const firebaseConfig = {
-            apiKey: "AIzaSyBzguLoHs-7yrbSal8IBDqnKL8MWwlUJZA",
-            authDomain: "tmcp-a366e.firebaseapp.com",
-            databaseURL: "https://tmcp-a366e-default-rtdb.firebaseio.com",
-            projectId: "tmcp-a366e",
-            storageBucket: "tmcp-a366e.firebasestorage.app",
-            messagingSenderId: "136159734708",
-            appId: "1:136159734708:web:5f33b5cd7535c09227e0e1"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        window.db = db; // Make db accessible globally
-    </script>
 </head>
 <body>
-    <!-- Dashboard Container -->
     <div class="dashboard">
         <header class="mobile-header">
             <h1>Syllabus</h1>
@@ -37,11 +19,11 @@
             <nav>
                 <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
                 <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
-                <button title="Upload assignments">📤 Upload Assignment</button>
+                <button title="Upload assignments" onclick="window.location.href='index.html'">📤 Upload Assignment</button>
                 <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
             </nav>
             <button class="settings-btn" title="Open settings">⚙️ Settings</button>
-            <button class="logout-btn" title="Logout">🚪 Logout</button>
+            <button class="logout-btn" title="Logout" id="logoutBtn">🚪 Logout</button>
         </aside>
 
         <main class="main-content">
@@ -50,7 +32,6 @@
                 <a href="index.html" class="back-btn">Back to Dashboard</a>
             </header>
 
-            <!-- Syllabus Section -->
             <section class="data-section">
                 <h2>Select Semester</h2>
                 <div class="form-grid">
@@ -69,6 +50,6 @@
         </main>
     </div>
 
-    <script src="syllabus.js"></script>
+    <script type="module" src="syllabus.js"></script>
 </body>
 </html>

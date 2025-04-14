@@ -1,4 +1,3 @@
-<!-- profile.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,19 +12,18 @@
     <div class="dashboard">
         <header class="mobile-header">
             <h1>Student Profile</h1>
-            <button class="hamburger" aria-label="Toggle menu">☰</button>
         </header>
         <aside class="sidebar">
             <h2>Student Portal</h2>
-            <button class="close-sidebar">×</button>
             <nav>
                 <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
                 <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
                 <button title="Upload assignments">📤 Upload Assignment</button>
                 <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
+                <button title="View attendance" onclick="window.location.href='attendance.html'">📅 Attendance</button>
             </nav>
             <button class="settings-btn" title="Open settings">⚙️ Settings</button>
-            <button class="logout-btn" title="Logout">🚪 Logout</button>
+            <button class="logout-btn" title="Logout" id="logoutBtn">🚪 Logout</button>
         </aside>
 
         <main class="main-content">

@@ -226,21 +226,19 @@
         background: rgba(0, 0, 0, 0.05);
     }
 
-    .details-btn {
-        display: inline-block;
-        padding: 6px 12px;
-        background: var(--btn-bg);
-        color: #fff;
-        text-decoration: none;
-        border-radius: 5px;
-        font-size: 14px;
-        transition: background 0.3s;
-        margin-left: 10px;
-    }
 
-    .details-btn:hover {
-        background: var(--btn-hover);
-    }
+    .details-btn {
+    padding: 5px 10px;
+    background: var(--btn-bg);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+.details-btn:hover {
+    background: var(--btn-hover);
+}
 
     @media (max-width: 768px) {
         .mobile-header {

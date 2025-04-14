@@ -9,6 +9,10 @@
 </head>
 <body>
     <div class="dashboard">
+        <div class="loader">
+            <div class="pencil-spinner"></div>
+            <p>Loading Marks...</p>
+        </div>
         <header class="mobile-header">
             <h1>Sessional Marks</h1>
             <button class="hamburger" aria-label="Toggle menu">☰</button>
@@ -19,8 +23,9 @@
             <nav>
                 <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
                 <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
-                <button title="Upload assignments" onclick="window.location.href='index.html'">📤 Upload Assignment</button>
+                <button title="Upload assignments">📤 Upload Assignment</button>
                 <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
+                <button title="View attendance" onclick="window.location.href='attendance.html'">📅 Attendance</button>
             </nav>
             <button class="settings-btn" title="Open settings">⚙️ Settings</button>
             <button class="logout-btn" title="Logout" id="logoutBtn">🚪 Logout</button>
@@ -79,6 +84,136 @@
         </main>
     </div>
 
-    <script type="module" src="marks.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+        import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzguLoHs-7yrbSal8IBDqnKL8MWwlUJZA",
+            authDomain: "tmcp-a366e.firebaseapp.com",
+            databaseURL: "https://tmcp-a366e-default-rtdb.firebaseio.com",
+            projectId: "tmcp-a366e",
+            storageBucket: "tmcp-a366e.firebasestorage.app",
+            messagingSenderId: "136159734708",
+            appId: "1:136159734708:web:5f33b5cd7535c09227e0e1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        const semesterSubjects = {
+            '1': ['English', 'Applied Maths 1', 'Applied Physics 1', 'FIT'],
+            '2': ['AIT', 'Applied Maths 2', 'Applied Physics 2', 'AE', 'EG', 'MMA', 'EVS'],
+            '3': ['OS', 'PIC', 'DBMS', 'DE'],
+            '4': ['English 2', 'COA', 'DS', 'OOPS', 'MOOCS'],
+            '5': ['WT', 'Python', 'CN', 'Cloud', 'MOOCS'],
+            '6': ['NS', 'SE', 'EDM']
+        };
+
+        // Sidebar toggle
+        const hamburger = document.querySelector('.hamburger');
+        const sidebar = document.querySelector('.sidebar');
+        const closeSidebar = document.querySelector('.close-sidebar');
+
+        hamburger?.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        closeSidebar?.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const rollNo = localStorage.getItem('studentRollNo');
+            if (!rollNo) {
+                console.error('No roll number found in localStorage');
+                signOut(auth).then(() => window.location.href = 'login.html');
+                return;
+            }
+
+            loadMarksData(rollNo);
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                localStorage.removeItem('studentRollNo');
+                localStorage.removeItem('studentData');
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        });
+
+        async function loadMarksData(rollNo) {
+            const loader = document.querySelector('.loader');
+            loader.style.display = 'flex'; // Show loader
+
+            try {
+                // Fetch student data to get semester
+                const studentRef = ref(database, `students/${rollNo}`);
+                const studentSnapshot = await get(studentRef);
+                const studentData = studentSnapshot.val();
+                if (!studentData) {
+                    throw new Error('Student data not found');
+                }
+                const semester = studentData.semester || '5';
+                localStorage.setItem('studentData', JSON.stringify(studentData));
+
+                const subjects = semesterSubjects[semester] || semesterSubjects['5'];
+
+                // Fetch sessional marks
+                const marksRef = ref(database, `sessional_marks/${rollNo}/${semester}`);
+                const marksSnapshot = await get(marksRef);
+                const marksData = marksSnapshot.val() || {};
+
+                populateMarks(subjects, marksData);
+            } catch (error) {
+                console.error('Error fetching marks data:', error);
+                alert('Error fetching marks: ' + error.message);
+                const semester = JSON.parse(localStorage.getItem('studentData'))?.semester || '5';
+                const subjects = semesterSubjects[semester] || semesterSubjects['5'];
+                populateMarks(subjects, {});
+            } finally {
+                loader.style.display = 'none'; // Hide loader
+            }
+        }
+
+        function populateMarks(subjects, marksData) {
+            const sessional1Marks = document.getElementById('sessional1Marks');
+            const sessional2Marks = document.getElementById('sessional2Marks');
+            const sessional3Marks = document.getElementById('sessional3Marks');
+
+            sessional1Marks.innerHTML = '';
+            subjects.forEach(subject => {
+                const marks = marksData[subject]?.sessional1 ?? 'N/A';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${subject}</td><td>${marks}</td>`;
+                sessional1Marks.appendChild(tr);
+            });
+
+            sessional2Marks.innerHTML = '';
+            subjects.forEach(subject => {
+                const marks = marksData[subject]?.sessional2 ?? 'N/A';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${subject}</td><td>${marks}</td>`;
+                sessional2Marks.appendChild(tr);
+            });
+
+            sessional3Marks.innerHTML = '';
+            subjects.forEach(subject => {
+                const marks = marksData[subject]?.sessional3 ?? 'N/A';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${subject}</td><td>${marks}</td>`;
+                sessional3Marks.appendChild(tr);
+            });
+        }
+    </script>
 </body>
 </html>

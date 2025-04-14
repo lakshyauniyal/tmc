@@ -15,12 +15,12 @@
         </header>
         <aside class="sidebar">
             <h2>Student Portal</h2>
-            <button class="close-sidebar">×</button>
             <nav>
                 <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
                 <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
                 <button title="Upload assignments">📤 Upload Assignment</button>
                 <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
+                <button title="View attendance" onclick="window.location.href='attendance.html'">📅 Attendance</button>
             </nav>
             <button class="settings-btn" title="Open settings">⚙️ Settings</button>
             <button class="logout-btn" title="Logout" id="logoutBtn">🚪 Logout</button>
@@ -43,7 +43,7 @@
             </section>
 
             <section id="sessionalMarksSection" class="data-section">
-                <h2>Sessional Marks</h2>
+                <h2>Sessional Marks <a href="marks.html" class="details-btn" style="float: right; margin-left: 10px;">Details</a></h2>
                 <table>
                     <thead>
                         <tr>
@@ -52,11 +52,11 @@
                             <th>Sessional 3</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="sessionalMarksBody">
                         <tr>
-                            <td>85 <a href="marks.html#sessional1" class="details-btn">Details</a></td>
-                            <td>90 <a href="marks.html#sessional2" class="details-btn">Details</a></td>
-                            <td>88 <a href="marks.html#sessional3" class="details-btn">Details</a></td>
+                            <td id="sessional1Percentage">Loading...</td>
+                            <td id="sessional2Percentage">Loading...</td>
+                            <td id="sessional3Percentage">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -82,7 +82,6 @@
         </main>
     </div>
 
-    <!-- Load Firebase and index.js -->
     <script type="module" src="index.js"></script>
 </body>
 </html>

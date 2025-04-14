@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --sidebar-bg: #2c3e50;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --accent-color: #3498db;
+            --btn-bg: #3498db;
+            --btn-hover: #2980b9;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --notification-success-bg: #27ae60;
+            --notification-error-bg: #e74c3c;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --sidebar-bg: #2c2c2c;
+            --card-bg: #333;
+            --text-color: #e0e0e0;
+            --accent-color: #4dabf7;
+            --btn-bg: #4dabf7;
+            --btn-hover: #339af0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .dashboard {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            position: relative; /* For loader positioning */
+        }
+
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 20px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: transform 0.3s ease;
+            z-index: 999;
+            margin-right: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+            margin: 10px 0;
+        }
+
+        .sidebar button {
+            padding: 12px;
+            background: var(--btn-bg);
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-align: left;
+        }
+
+        .sidebar button:hover {
+            background: var(--btn-hover);
+        }
+
+        .settings-btn, .logout-btn {
+            padding: 12px;
+            background: var(--btn-bg);
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .logout-btn {
+            background: var(--notification-error-bg);
+        }
+
+        .settings-btn:hover, .logout-btn:hover {
+            background: var(--btn-hover);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 270px;
+        }
+
+        .header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--accent-color);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .header h1:hover {
+            color: var(--btn-hover);
+        }
+
+        .data-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .data-section h2 {
+            font-size: 22px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        th {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover td {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        #attendanceStatus {
+            margin-top: 10px;
+            font-size: 16px;
+            color: var(--accent-color);
+        }
+
+        .close-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+
+        /* Loader Styles */
+        .loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000; /* Above sidebar and header */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pencil-spinner {
+            width: 20px;
+            height: 60px;
+            background: var(--accent-color);
+            position: relative;
+            animation: spin 1s infinite linear;
+        }
+
+        .pencil-spinner::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #f4c430; /* Pencil tip color */
+        }
+
+        .pencil-spinner::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 5px;
+            width: 10px;
+            height: 5px;
+            background: #ccc; /* Eraser */
+        }
+
+        .loader p {
+            margin-top: 20px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Semester Dropdown */
+        #semesterSelect {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        /* Total Row Styling */
+        .total-row td {
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 80%;
+                max-width: 300px;
+                margin-right: 0;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .close-sidebar {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 70px;
+            }
+
+            table {
+                overflow-x: auto;
+                display: block;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="loader">
+            <div class="pencil-spinner"></div>
+            <p>Loading Attendance...</p>
+        </div>
+        <header class="mobile-header">
+            <h1>Attendance</h1>
+            <button class="hamburger" aria-label="Toggle menu">☰</button>
+        </header>
+        <aside class="sidebar">
+            <h2>Student Portal</h2>
+            <button class="close-sidebar">×</button>
+            <nav>
+                <button title="View student details" onclick="window.location.href='profile.html'">👤 Profile</button>
+                <button title="View sessional marks" onclick="window.location.href='marks.html'">📊 Marks</button>
+                <button title="Upload assignments" onclick="window.location.href='index.html#assignmentUploadSection'">📤 Upload Assignment</button>
+                <button title="View syllabus" onclick="window.location.href='syllabus.html'">📚 Syllabus</button>
+                <button title="View attendance" onclick="window.location.href='attendance.html'">📅 Attendance</button>
+            </nav>
+            <button class="settings-btn" title="Open settings">⚙️ Settings</button>
+            <button class="logout-btn" title="Logout" id="logoutBtn">🚪 Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Attendance</h1>
+            </header>
+            <section class="data-section">
+                <h2>Your Attendance</h2>
+                <select id="semesterSelect">
+                    <option value="">Select Semester</option>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                </select>
+                <table id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Total Classes</th>
+                            <th>Classes Attended</th>
+                            <th>Attendance (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceBody">
+                        <!-- Attendance data will be populated here -->
+                    </tbody>
+                </table>
+                <div id="attendanceStatus"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+        import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzguLoHs-7yrbSal8IBDqnKL8MWwlUJZA",
+            authDomain: "tmcp-a366e.firebaseapp.com",
+            databaseURL: "https://tmcp-a366e-default-rtdb.firebaseio.com",
+            projectId: "tmcp-a366e",
+            storageBucket: "tmcp-a366e.firebasestorage.app",
+            messagingSenderId: "136159734708",
+            appId: "1:136159734708:web:5f33b5cd7535c09227e0e1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        const semesterSubjects = {
+            '1': ['English', 'Applied Maths 1', 'Applied Physics 1', 'FIT'],
+            '2': ['AIT', 'Applied Maths 2', 'Applied Physics 2', 'AE', 'EG', 'MMA', 'EVS'],
+            '3': ['OS', 'PIC', 'DBMS', 'DE'],
+            '4': ['English 2', 'COA', 'DS', 'OOPS', 'MOOCS'],
+            '5': ['WT', 'Python', 'CN', 'Cloud', 'MOOCS'],
+            '6': ['NS', 'SE', 'EDM']
+        };
+
+        // Sidebar toggle for mobile
+        const hamburger = document.querySelector('.hamburger');
+        const sidebar = document.querySelector('.sidebar');
+        const closeSidebar = document.querySelector('.close-sidebar');
+
+        hamburger?.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        closeSidebar?.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                localStorage.removeItem('studentRollNo');
+                localStorage.removeItem('studentData');
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const rollNo = localStorage.getItem('studentRollNo');
+            if (!rollNo) {
+                console.error('No roll number found in localStorage');
+                auth.signOut().then(() => window.location.href = 'login.html');
+                return;
+            }
+
+            // Load attendance for current semester initially
+            let studentData = JSON.parse(localStorage.getItem('studentData'));
+            const initialSemester = studentData?.semester || '5';
+            document.getElementById('semesterSelect').value = initialSemester;
+            loadAttendanceData(rollNo, initialSemester);
+
+            // Add event listener for semester change
+            document.getElementById('semesterSelect').addEventListener('change', (e) => {
+                const selectedSemester = e.target.value;
+                if (selectedSemester) {
+                    loadAttendanceData(rollNo, selectedSemester);
+                } else {
+                    document.getElementById('attendanceBody').innerHTML = '';
+                    document.getElementById('attendanceStatus').textContent = 'Please select a semester.';
+                    document.getElementById('attendanceStatus').style.color = 'var(--notification-error-bg)';
+                }
+            });
+        });
+
+        async function loadAttendanceData(rollNo, semester) {
+            const loader = document.querySelector('.loader');
+            loader.style.display = 'flex'; // Show loader
+
+            try {
+                const subjects = semesterSubjects[semester] || [];
+                const attendanceBody = document.getElementById('attendanceBody');
+                const attendanceStatus = document.getElementById('attendanceStatus');
+                attendanceBody.innerHTML = '';
+
+                if (subjects.length === 0) {
+                    throw new Error('No subjects found for this semester');
+                }
+
+                let totalClassesSum = 0;
+                let attendedClassesSum = 0;
+
+                for (const subject of subjects) {
+                    const attendanceRef = ref(database, `attendance/${rollNo}/${subject}`);
+                    const snapshot = await get(attendanceRef);
+                    const data = snapshot.val();
+
+                    const totalClasses = data?.totalClasses || 0;
+                    const attendedClasses = data?.attendedClasses || 0;
+                    const percentage = totalClasses > 0 ? ((attendedClasses / totalClasses) * 100).toFixed(2) : '0.00';
+
+                    totalClassesSum += totalClasses;
+                    attendedClassesSum += attendedClasses;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${subject}</td>
+                        <td>${totalClasses}</td>
+                        <td>${attendedClasses}</td>
+                        <td>${percentage}%</td>
+                    `;
+                    attendanceBody.appendChild(row);
+                }
+
+                // Add total attendance row
+                const totalPercentage = totalClassesSum > 0 ? ((attendedClassesSum / totalClassesSum) * 100).toFixed(2) : '0.00';
+                const totalRow = document.createElement('tr');
+                totalRow.classList.add('total-row');
+                totalRow.innerHTML = `
+                    <td>Total</td>
+                    <td>${totalClassesSum}</td>
+                    <td>${attendedClassesSum}</td>
+                    <td>${totalPercentage}%</td>
+                `;
+                attendanceBody.appendChild(totalRow);
+
+                
+                attendanceStatus.style.color = 'var(--notification-success-bg)';
+            } catch (error) {
+                console.error('Error fetching attendance:', error);
+                const attendanceStatus = document.getElementById('attendanceStatus');
+                attendanceStatus.textContent = 'Error loading attendance: ' + error.message;
+                attendanceStatus.style.color = 'var(--notification-error-bg)';
+            } finally {
+                loader.style.display = 'none'; // Hide loader
+            }
+        }
+    </script>
+</body>
+</html>
